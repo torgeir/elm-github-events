@@ -11,12 +11,30 @@ module Github
         , PullRequest
         )
 
+{-| This library fetches public github events for users using the github api.
+
+# Functions
+@docs fetchAllEvents
+
+# Errors
+@docs ApiError
+
+# Query types
+@docs Username
+
+# Response types
+@docs Events, Event, EventActor, EventRepo, EventAction, PullRequest
+
+-}
+
 import Http exposing (..)
 import Json.Decode as Json exposing ((:=))
 import Task exposing (..)
 import Regex
 
 
+{-| Fetch all github events for a list of string usernames
+-}
 fetchAllEvents : (Error -> a) -> (Events -> a) -> List String -> Cmd a
 fetchAllEvents failedMsg successMsg usernames =
     let
@@ -26,6 +44,8 @@ fetchAllEvents failedMsg successMsg usernames =
         Cmd.batch cmds
 
 
+{-| Fetch github events a single string username
+-}
 fetchUserEvents : (Error -> a) -> (Events -> a) -> String -> Cmd a
 fetchUserEvents failedMsg successMsg user =
     let
@@ -39,18 +59,26 @@ fetchUserEvents failedMsg successMsg user =
         (Task.perform failedMsg successMsg request)
 
 
+{-| Error response returned when api calls fail
+-}
 type alias ApiError =
     Http.Error
 
 
+{-| Username query type
+-}
 type alias Username =
     String
 
 
+{-| Events returned from the api
+-}
 type alias Events =
     List Event
 
 
+{-| Event type returned from the api
+-}
 type alias Event =
     { id : String
     , action : EventAction
@@ -60,6 +88,8 @@ type alias Event =
     }
 
 
+{-| EventActor type that states who triggered the event
+-}
 type alias EventActor =
     { display_login : String
     , url : String
@@ -67,6 +97,8 @@ type alias EventActor =
     }
 
 
+{-| EventRepo type for the repo that has been acted on and its url'en
+-}
 type alias EventRepo =
     { name : String
     , url : String
@@ -82,6 +114,8 @@ type alias Commits =
     List Commit
 
 
+{-| PullRequest type with extra info about pull requests
+-}
 type alias PullRequest =
     { action : String
     , number : Int
@@ -114,6 +148,8 @@ type alias IssueComment =
     }
 
 
+{-| EventAction types that represent the action that happened in the event api
+-}
 type EventAction
     = EventActionPush EventActionPushPayload
     | EventActionFork
