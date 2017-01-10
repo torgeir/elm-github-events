@@ -275,3 +275,5 @@ main =
         }
 
 ```
+
+![example image](https://raw.githubusercontent.com/torgeir/elm-github-events/master/elm-github-events.png)
