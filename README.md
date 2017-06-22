@@ -9,8 +9,7 @@ A huge, but runnable, example in a single `Main.elm` file.
 ```elm
 module Main exposing (..)
 
-import Html.App exposing (program)
-import Html exposing (img, a, div, text, span)
+import Html exposing (program, img, a, div, text, span)
 import Html.Attributes exposing (href, src, height, width)
 import Github
 
@@ -182,9 +181,9 @@ description entry =
                     _ ->
                         text ""
 
-            Github.EventActionUnknown type' ->
+            Github.EventActionUnknown actionType ->
                 span []
-                    [ text ("<unhandled event type " ++ type' ++ "> ")
+                    [ text ("<unhandled event type " ++ actionType ++ "> ")
                     , repo
                     ]
 
@@ -199,8 +198,7 @@ type alias Model =
 
 
 type Action
-    = FetchEventsResultAction Github.Events
-    | FetchEventsFailedAction Github.ApiError
+    = FetchEventsResult (Result Github.ApiError Github.Events)
 
 
 users : List String
@@ -223,7 +221,7 @@ subscriptions model =
 
 init : ( Model, Cmd Action )
 init =
-    ( initialModel, (Github.fetchAllEvents FetchEventsFailedAction FetchEventsResultAction users) )
+    ( initialModel, (Github.fetchAllEvents FetchEventsResult users) )
 
 
 view : Model -> Html.Html msg
@@ -252,7 +250,7 @@ eventToEntry event =
 update : Action -> Model -> ( Model, Cmd Action )
 update msg model =
     case msg of
-        FetchEventsFailedAction error ->
+        FetchEventsResult (Err error) ->
             let
                 errorText =
                     (toString error)
@@ -261,11 +259,11 @@ update msg model =
                     errorText
                     ( model, Cmd.none )
 
-        FetchEventsResultAction eventList ->
+        FetchEventsResult (Ok eventList) ->
             ( (joinEntries model (List.map eventToEntry eventList)), Cmd.none )
 
 
-main : Program Never
+main : Program Never Model Action
 main =
     program
         { view = view
@@ -273,7 +271,6 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
-
 ```
 
 ![example image](https://raw.githubusercontent.com/torgeir/elm-github-events/master/elm-github-events.png)
